@@ -1,0 +1,625 @@
+-- Script Auto Jump para Evade com Delta UI
+local Delta = loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/inf-delta/main/delta.lua"))()
+
+-- Criar janela
+local Window = Delta:CreateWindow({
+    Title = "Evade Script",
+    Subtitle = "by carlin",
+    Size = UDim2.fromOffset(600, 500)
+})
+
+-- Aba Main
+local MainTab = Window:CreateTab({
+    Title = "Main",
+    Icon = "rbxassetid://7072706993"
+})
+
+-- Aba Premium
+local PremiumTab = Window:CreateTab({
+    Title = "Premium",
+    Icon = "rbxassetid://7072706993"
+})
+
+-- Variáveis
+local autoJumpEnabled = false
+local mobileAutoJumpEnabled = false
+local switchLagEnabled = false
+local mobileButtonEnabled = false
+local autoCrouchEnabled = false
+local autoCrouchButtonEnabled = false
+local switchLagKey = Enum.KeyCode.X
+local autoCrouchKey = Enum.KeyCode.C
+local autoCrouchActive = false
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local originalPosition = humanoidRootPart.Position
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+-- ====== ABA MAIN ======
+
+-- Toggle para Auto Jump
+MainTab:CreateToggle({
+    Name = "Auto Jump",
+    Description = "Para pular basta segurar o botão de pular",
+    StartingValue = false,
+    Callback = function(Value)
+        autoJumpEnabled = Value
+        if Value then
+            print("✓ Auto Jump Ativado!")
+            Delta:Notify({
+                Title = "Auto Jump",
+                Description = "Auto Jump Ativado!",
+                Icon = "rbxassetid://7072706993",
+                Duration = 2
+            })
+        else
+            print("✗ Auto Jump Desativado!")
+        end
+    end
+})
+
+-- Toggle para Mobile Auto Jump Button
+MainTab:CreateToggle({
+    Name = "Mobile Auto Jump Button",
+    Description = "Mostra um botão arrastável para Auto Jump",
+    StartingValue = false,
+    Callback = function(Value)
+        mobileAutoJumpEnabled = Value
+        if Value then
+            print("✓ Mobile Auto Jump Button Ativado!")
+            createMobileAutoJumpButton()
+            Delta:Notify({
+                Title = "Mobile Button",
+                Description = "Botão Auto Jump criado!",
+                Icon = "rbxassetid://7072706993",
+                Duration = 2
+            })
+        else
+            print("✗ Mobile Auto Jump Button Desativado!")
+            if game.CoreGui:FindFirstChild("AutoJumpButton") then
+                game.CoreGui:FindFirstChild("AutoJumpButton"):Destroy()
+            end
+        end
+    end
+})
+
+MainTab:CreateDivider()
+
+-- Toggle para Switch Lag
+MainTab:CreateToggle({
+    Name = "Switch Lag",
+    Description = "Faz você travar por 0.5 segundos para enganar inimigos",
+    StartingValue = false,
+    Callback = function(Value)
+        switchLagEnabled = Value
+        if Value then
+            print("✓ Switch Lag Ativado!")
+            Delta:Notify({
+                Title = "Switch Lag",
+                Description = "Switch Lag Ativado!",
+                Icon = "rbxassetid://7072706993",
+                Duration = 2
+            })
+        else
+            print("✗ Switch Lag Desativado!")
+        end
+    end
+})
+
+-- Keybind para Switch Lag
+MainTab:CreateKeybind({
+    Name = "Tecla Switch Lag",
+    StartingValue = Enum.KeyCode.X,
+    Callback = function(Value)
+        switchLagKey = Value
+        print("✓ Tecla de Switch Lag alterada para: " .. Value.Name)
+    end
+})
+
+-- Toggle para Mobile Button Switch Lag
+MainTab:CreateToggle({
+    Name = "Mobile Button Switch Lag",
+    Description = "Mostra um botão arrastável para Switch Lag",
+    StartingValue = false,
+    Callback = function(Value)
+        mobileButtonEnabled = Value
+        if Value then
+            print("✓ Mobile Button Ativado!")
+            createMobileButton()
+            Delta:Notify({
+                Title = "Mobile Button",
+                Description = "Botão Switch Lag criado!",
+                Icon = "rbxassetid://7072706993",
+                Duration = 2
+            })
+        else
+            print("✗ Mobile Button Desativado!")
+            if game.CoreGui:FindFirstChild("SwitchLagButton") then
+                game.CoreGui:FindFirstChild("SwitchLagButton"):Destroy()
+            end
+        end
+    end
+})
+
+MainTab:CreateDivider()
+
+-- Toggle para Auto Crouch
+MainTab:CreateToggle({
+    Name = "Auto Crouch",
+    Description = "Spamma a tecla de crouch automaticamente",
+    StartingValue = false,
+    Callback = function(Value)
+        autoCrouchEnabled = Value
+        if Value then
+            print("✓ Auto Crouch Ativado!")
+            Delta:Notify({
+                Title = "Auto Crouch",
+                Description = "Auto Crouch Ativado!",
+                Icon = "rbxassetid://7072706993",
+                Duration = 2
+            })
+        else
+            print("✗ Auto Crouch Desativado!")
+            autoCrouchActive = false
+        end
+    end
+})
+
+-- Keybind para Auto Crouch
+MainTab:CreateKeybind({
+    Name = "Tecla Auto Crouch",
+    StartingValue = Enum.KeyCode.C,
+    Callback = function(Value)
+        autoCrouchKey = Value
+        print("✓ Tecla de Auto Crouch alterada para: " .. Value.Name)
+    end
+})
+
+-- Toggle para Mobile Button Auto Crouch
+MainTab:CreateToggle({
+    Name = "Mobile Button Auto Crouch",
+    Description = "Mostra um botão arrastável para Auto Crouch",
+    StartingValue = false,
+    Callback = function(Value)
+        autoCrouchButtonEnabled = Value
+        if Value then
+            print("✓ Mobile Button Auto Crouch Ativado!")
+            createMobileAutoCrouchButton()
+            Delta:Notify({
+                Title = "Mobile Button",
+                Description = "Botão Auto Crouch criado!",
+                Icon = "rbxassetid://7072706993",
+                Duration = 2
+            })
+        else
+            print("✗ Mobile Button Auto Crouch Desativado!")
+            if game.CoreGui:FindFirstChild("AutoCrouchButton") then
+                game.CoreGui:FindFirstChild("AutoCrouchButton"):Destroy()
+            end
+        end
+    end
+})
+
+-- ====== ABA PREMIUM ======
+
+PremiumTab:CreateLabel({
+    Text = "🔒 Recursos Premium"
+})
+
+PremiumTab:CreateDivider()
+
+PremiumTab:CreateLabel({
+    Text = "ℹ️ Informações"
+})
+
+PremiumTab:CreateLabel({
+    Text = "Script criado por: carlin"
+})
+
+PremiumTab:CreateLabel({
+    Text = "Versão: 1.0.0"
+})
+
+PremiumTab:CreateLabel({
+    Text = "Status: Ativo ✓"
+})
+
+PremiumTab:CreateDivider()
+
+PremiumTab:CreateLabel({
+    Text = "📜 Recursos Disponíveis"
+})
+
+PremiumTab:CreateLabel({
+    Text = "✓ Auto Jump"
+})
+
+PremiumTab:CreateLabel({
+    Text = "✓ Switch Lag"
+})
+
+PremiumTab:CreateLabel({
+    Text = "✓ Auto Crouch"
+})
+
+PremiumTab:CreateLabel({
+    Text = "✓ Mobile Buttons"
+})
+
+PremiumTab:CreateDivider()
+
+PremiumTab:CreateButton({
+    Name = "Suporte",
+    Description = "Entre em contato com o criador",
+    Callback = function()
+        Delta:Notify({
+            Title = "Suporte",
+            Description = "Entre em contato com: carlin",
+            Icon = "rbxassetid://7072706993",
+            Duration = 3
+        })
+    end
+})
+
+-- ====== FUNÇÕES GERAIS ======
+
+-- Função para detectar se está no chão
+local function isGrounded()
+    if not character or not humanoidRootPart then return false end
+    
+    local rayOrigin = humanoidRootPart.Position + Vector3.new(0, -3, 0)
+    local rayDirection = Vector3.new(0, -1, 0)
+    
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+    raycastParams.FilterDescendantsInstances = {character}
+    
+    local result = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
+    return result ~= nil
+end
+
+-- Função Switch Lag
+local function activateSwitchLag()
+    if not character or not humanoidRootPart then return end
+    
+    print("✓ Switch Lag ativado! Travando por 0.5 segundos...")
+    
+    pcall(function()
+        local originalVelocity = humanoidRootPart.AssemblyLinearVelocity
+        humanoidRootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+        
+        local originalAngularVelocity = humanoidRootPart.AssemblyAngularVelocity
+        humanoidRootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+        
+        local camera = workspace.CurrentCamera
+        local originalCFrame = camera.CFrame
+        
+        local connection
+        connection = RunService.Heartbeat:Connect(function()
+            if character and humanoidRootPart and character.Parent then
+                humanoidRootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                humanoidRootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                camera.CFrame = originalCFrame
+            end
+        end)
+        
+        wait(0.5)
+        
+        connection:Disconnect()
+        if character and humanoidRootPart and character.Parent then
+            humanoidRootPart.AssemblyLinearVelocity = originalVelocity
+            humanoidRootPart.AssemblyAngularVelocity = originalAngularVelocity
+        end
+        
+        print("✓ Switch Lag descongelado!")
+    end)
+end
+
+-- Função para ativar Auto Crouch
+local function startAutoCrouch()
+    autoCrouchActive = true
+    print("✓ Auto Crouch iniciado!")
+    
+    while autoCrouchActive and autoCrouchEnabled do
+        keyPress(autoCrouchKey)
+        wait(0.50)
+    end
+end
+
+-- Função para parar Auto Crouch
+local function stopAutoCrouch()
+    autoCrouchActive = false
+    print("✓ Auto Crouch parado!")
+end
+
+-- Função para simular pressionamento de tecla
+function keyPress(key)
+    pcall(function()
+        local VirtualInputManager = game:GetService("VirtualInputManager")
+        VirtualInputManager:SendKeyEvent(true, key, false, game)
+        wait(0.05)
+        VirtualInputManager:SendKeyEvent(false, key, false, game)
+    end)
+end
+
+-- Função para criar botão Mobile Auto Jump
+local function createMobileAutoJumpButton()
+    if game.CoreGui:FindFirstChild("AutoJumpButton") then
+        game.CoreGui:FindFirstChild("AutoJumpButton"):Destroy()
+    end
+    
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "AutoJumpButton"
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = game.CoreGui
+    
+    local button = Instance.new("TextButton")
+    button.Name = "Button"
+    button.Size = UDim2.new(0, 60, 0, 60)
+    button.Position = UDim2.new(0, 20, 0, 20)
+    button.BackgroundColor3 = Color3.fromRGB(66, 245, 123)
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextSize = 10
+    button.Text = "AUTO\nJUMP"
+    button.BorderSizePixel = 0
+    button.Font = Enum.Font.GothamBold
+    button.Parent = screenGui
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = button
+    
+    local isActive = false
+    
+    button.MouseEnter:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(100, 255, 150)
+    end)
+    
+    button.MouseLeave:Connect(function()
+        if isActive then
+            button.BackgroundColor3 = Color3.fromRGB(100, 255, 100)
+        else
+            button.BackgroundColor3 = Color3.fromRGB(66, 245, 123)
+        end
+    end)
+    
+    button.MouseButton1Down:Connect(function()
+        if not isActive then
+            autoJumpEnabled = true
+            isActive = true
+            button.BackgroundColor3 = Color3.fromRGB(100, 255, 100)
+            print("✓ Auto Jump Ativado via botão!")
+        else
+            autoJumpEnabled = false
+            isActive = false
+            button.BackgroundColor3 = Color3.fromRGB(66, 245, 123)
+            print("✗ Auto Jump Desativado via botão!")
+        end
+    end)
+    
+    local dragging = false
+    local dragStart
+    local startPos
+    
+    button.InputBegan:Connect(function(input, gameProcessed)
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = button.Position
+        end
+    end)
+    
+    button.InputEnded:Connect(function(input, gameProcessed)
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    
+    game:GetService("UserInputService").InputChanged:Connect(function(input, gameProcessed)
+        if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
+            local delta = input.Position - dragStart
+            button.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+-- Função para criar botão Mobile Switch Lag
+local function createMobileButton()
+    if game.CoreGui:FindFirstChild("SwitchLagButton") then
+        game.CoreGui:FindFirstChild("SwitchLagButton"):Destroy()
+    end
+    
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "SwitchLagButton"
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = game.CoreGui
+    
+    local button = Instance.new("TextButton")
+    button.Name = "Button"
+    button.Size = UDim2.new(0, 60, 0, 60)
+    button.Position = UDim2.new(0, 20, 0, 100)
+    button.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextSize = 12
+    button.Text = "LAG\nSWITCH"
+    button.BorderSizePixel = 0
+    button.Font = Enum.Font.GothamBold
+    button.Parent = screenGui
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = button
+    
+    button.MouseEnter:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(255, 150, 150)
+    end)
+    
+    button.MouseLeave:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+    end)
+    
+    button.MouseButton1Down:Connect(function()
+        if switchLagEnabled then
+            activateSwitchLag()
+        end
+    end)
+    
+    local dragging = false
+    local dragStart
+    local startPos
+    
+    button.InputBegan:Connect(function(input, gameProcessed)
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = button.Position
+        end
+    end)
+    
+    button.InputEnded:Connect(function(input, gameProcessed)
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    
+    game:GetService("UserInputService").InputChanged:Connect(function(input, gameProcessed)
+        if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
+            local delta = input.Position - dragStart
+            button.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+-- Função para criar botão Mobile Auto Crouch
+local function createMobileAutoCrouchButton()
+    if game.CoreGui:FindFirstChild("AutoCrouchButton") then
+        game.CoreGui:FindFirstChild("AutoCrouchButton"):Destroy()
+    end
+    
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "AutoCrouchButton"
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = game.CoreGui
+    
+    local button = Instance.new("TextButton")
+    button.Name = "Button"
+    button.Size = UDim2.new(0, 60, 0, 60)
+    button.Position = UDim2.new(0, 20, 0, 180)
+    button.BackgroundColor3 = Color3.fromRGB(100, 180, 255)
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextSize = 10
+    button.Text = "AUTO\nCROUCH"
+    button.BorderSizePixel = 0
+    button.Font = Enum.Font.GothamBold
+    button.Parent = screenGui
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = button
+    
+    local isActive = false
+    
+    button.MouseEnter:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(150, 200, 255)
+    end)
+    
+    button.MouseLeave:Connect(function()
+        if isActive then
+            button.BackgroundColor3 = Color3.fromRGB(100, 255, 100)
+        else
+            button.BackgroundColor3 = Color3.fromRGB(100, 180, 255)
+        end
+    end)
+    
+    button.MouseButton1Down:Connect(function()
+        if autoCrouchEnabled then
+            if not isActive then
+                startAutoCrouch()
+                isActive = true
+                button.BackgroundColor3 = Color3.fromRGB(100, 255, 100)
+            else
+                stopAutoCrouch()
+                isActive = false
+                button.BackgroundColor3 = Color3.fromRGB(100, 180, 255)
+            end
+        end
+    end)
+    
+    local dragging = false
+    local dragStart
+    local startPos
+    
+    button.InputBegan:Connect(function(input, gameProcessed)
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = button.Position
+        end
+    end)
+    
+    button.InputEnded:Connect(function(input, gameProcessed)
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    
+    game:GetService("UserInputService").InputChanged:Connect(function(input, gameProcessed)
+        if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
+            local delta = input.Position - dragStart
+            button.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+-- Detectar quando o jogador pressiona uma tecla específica
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    
+    if switchLagEnabled and input.KeyCode == switchLagKey then
+        activateSwitchLag()
+    end
+    
+    if autoCrouchEnabled and input.KeyCode == autoCrouchKey then
+        startAutoCrouch()
+    end
+end)
+
+-- Detectar quando o jogador solta a tecla
+UserInputService.InputEnded:Connect(function(input, gameProcessed)
+    if autoCrouchEnabled and input.KeyCode == autoCrouchKey then
+        stopAutoCrouch()
+    end
+end)
+
+-- Loop principal de Auto Jump
+RunService.Heartbeat:Connect(function()
+    if not character or not humanoid or humanoid.Health <= 0 or not character.Parent then return end
+    
+    if autoJumpEnabled then
+        if isGrounded() then
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
+
+-- Atualizar referências quando o personagem respawna
+player.CharacterAdded:Connect(function(newCharacter)
+    character = newCharacter
+    humanoid = character:WaitForChild("Humanoid")
+    humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    autoCrouchActive = false
+    print("✓ Personagem respawned!")
+end)
+
+-- Notificação de conclusão
+Delta:Notify({
+    Title = "Script Carregado",
+    Description = "Auto Jump Script para Evade pronto!",
+    Icon = "rbxassetid://7072706993",
+    Duration = 3
+})
+
+print("✓ Script executado com sucesso!")
